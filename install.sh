@@ -79,7 +79,7 @@ EOF
 	}
 
 SWAP_DIR="/var/swap"
-MEMM=$(dmidecode --type memory)
+MEMM="dmidecode --type memory"
 
 swabcrod() {
 	chmod 600 $SWAP_DIR
@@ -89,11 +89,11 @@ swabcrod() {
 	}
 
 cekswab() {
-	if [[ $MEMM | grep "Size: 1024 MB" ]] ; then
+	if ( $MEMM | grep "Size: 1024 MB" ) ; then
 		fallocate -l 2069M $SWAP_DIR ; swabcrod
-	elif [[ $MEMM | grep "Size: 2048 MB" ]] ; then
+	elif ( $MEMM | grep "Size: 2048 MB" ) ; then
 		fallocate -l 1069M $SWAP_DIR ; swabcrod
-	elif [[ $MEMM | grep "Size: 4096 MB" ]] ; then
+	elif ( $MEMM | grep "Size: 4096 MB" ) ; then
 		fallocate -l 769M $SWAP_DIR ; swabcrod
 	else
 		fallocate -l 469M $SWAP_DIR ; swabcrod
