@@ -14,7 +14,7 @@ aCOLOUR=(
 	)
 	GREEN_LINE="${aCOLOUR[0]}──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────$COLOUR_RESET"
 	GREEN_BULLET="${aCOLOUR[2]}		[+]	$COLOUR_RESET"
-	GREEN_WARN="${aCOLOUR[3]}		[!] $COLOUR_RESET"
+	GREEN_WARN="${aCOLOUR[2]}		[!] $COLOUR_RESET"
 	RED_WARN="${aCOLOUR[3]}		[!] $COLOUR_RESET"
 
 DIRQL="/etc/ql"
@@ -42,7 +42,6 @@ help() {
 	$ECMD "    -d, --rem		remove 'Exited' container"
 	$ECMD "    -j, --cpu		show total cpu usage"
 	$ECMD "    -up, --update	update script"
-#	$ECMD "    -k, --swap		add or remove swap"
 	$ECMD "    -n, --hostname	change hostname"
 	$ECMD "    -sn, --sn		change hwsn"
 	$ECMD "    -fp, --fpull	pull qlauncher images"
@@ -69,9 +68,16 @@ check() {
 status() {
 	$ECMD ; docker ps -a ; $ECMD
 	}
-
+	
 bind() {
-	$ECMD "\nPlease open this URL on your browser : \n" ; $QLS bind | cut -c 44-120 ; $ECMD
+		if find /etc/qlauncher-qr -type f | cut -b 18- ; then
+			$ECMD "Bind your device with QQQ App\n" | lolcat
+		else
+			$ECMD "$GREEN_WARN${aCOLOUR[0]}Generating file ...$COLOUR_RESET"
+			echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr
+			$ECMD "$GREEN_WARN${aCOLOUR[2]}OK"
+		fi
+	qrencode -t ANSIUTF8 < "/etc/qlauncher-qr" ; $ECMD "\nFor more information open this URL on your browser : \n" | lolcat ; $QLS bind | cut -c 44-120 | lolcat ; $ECMD
 	}
 
 TRUE=$(check | grep '"edgecore_alive":"true"')
@@ -95,7 +101,7 @@ start() {
 		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 			$ECMD "$COLOUR_RESET" ; exit 1
 		else
-			$ECMD ; status | lolcat ; $ECMD
+			$ECMD ; check | lolcat ; $ECMD
 		fi
 	else
       $ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Already Running $COLOUR_RESET\n" ; exit 1
@@ -120,7 +126,7 @@ stop() {
 		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 			$ECMD "$COLOUR_RESET" ; exit 1
 		else
-			$ECMD ; check | grep "edgecore_alive" | lolcat ; $ECMD
+			$ECMD "		[+] $(check | grep "edgecore_alive" )\n" | lolcat
 		fi
 	else
       $ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Not Running $COLOUR_RESET\n" ; exit 1
@@ -153,7 +159,7 @@ restart() {
 #################
 
 port() {
-	MYIP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+	MYIP=$(ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$|\1|p' | head -1)
 	$ECMD ; nmap -p 443,32440-32449 $MYIP | lolcat ; $ECMD
 	}
 
@@ -199,12 +205,15 @@ update() {
 
 		if [[ ! -z $RPM ]]; then
     		yum -y update ; yum -y upgrade
+    		yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
 		elif [[ ! -z $APT ]]; then
     		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get autoremove -qq -y
+    		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools qrencode nmap dmidecode lolcat -qq -y
 		else
     		exit 1
 		fi
-	wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q
+	
+	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr ; clear ; about
 	}
 
 hostname() {
@@ -229,9 +238,7 @@ change_hwsn() {
 	CUR_HWSN=$(cat /etc/machine-id)
 	read -r -p "		[+] Enter new hwsn : " SN
 	$ECMD "${aCOLOUR[0]}		[+] The current hwsn is : ${aCOLOUR[2]}$CUR_HWSN\n${aCOLOUR[0]}"
-    	echo $SN > /etc/qlauncher
-    	echo $SN > /etc/machine-id
-    	Q -r
+    	echo $SN > /etc/qlauncher ; echo $SN > /etc/machine-id ; restart
 	}
 
 pull_requirements() {
@@ -298,10 +305,16 @@ check | lolcat
 status | lolcat
 ;;
  -b|--bind)
-bind | lolcat
+bind
+;;
+ -p|--port)
+port
 ;;
  -d|--rem)
 rem
+;;
+ -up|--update)
+update
 ;;
  -j|--cpu)
 cpu_usage

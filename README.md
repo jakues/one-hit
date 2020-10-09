@@ -6,6 +6,7 @@ It automatically downloads and installs the following packages:
 * docker-ce
 * net-tools
 * lolcat 😋
+* qrencode
 * Qlauncher (Latest)
 
 # [ Prerequisites ]
@@ -15,15 +16,14 @@ The installation scripts require the following:
 * Run as root user
 
 # [ Install ]
-use this command if you're haven't installed Qlauncher before
-```
-curl -sSL https://git.io/JUxCs | bash
-```
-
+* Use this command to install Qlauncher
+	* `curl -sSL https://git.io/JUxCs | bash`
+* Script usage
+	* `Q --help`
 
 # [ Uninstall ]
 
-use this command to uninstall Qlauncher
+Use this command to uninstall Qlauncher
 ```
 coming soon
 ```

@@ -26,7 +26,7 @@ tools_deb() {
 	$ECMD "$GREEN_BULLET${aCOLOUR[2]}Updating Package ..."
 	$ECMD "$GREEN_LINE"
 
-		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools nmap dmidecode lolcat -qq -y
+		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools qrencode nmap dmidecode lolcat -qq -y
 	}
 
 tools_rpm() {
@@ -34,7 +34,7 @@ tools_rpm() {
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Updating Package ..."
         $ECMD "$GREEN_LINE"
 
-                yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools ruby nmap dmidecode unzip -y
+                yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
 	}
 
 req() {
@@ -42,7 +42,7 @@ req() {
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Requirements ..."
         $ECMD "$GREEN_LINE"
 
-                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q
+                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr
 	}
 
 docker() {
