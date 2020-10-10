@@ -8,12 +8,10 @@
 ECMD="echo -e"
 COLOUR_RESET='\e[0m'
 aCOLOUR=(
-
 		'\e[1;33m'	# Yellow
 		'\e[1m'		# Bold white
 		'\e[1;32m'	# Green
 		'\e[1;31m'  # Red
-
 	)
 
 	GREEN_LINE="${aCOLOUR[0]}──────────────────────────────────────────────────────────$COLOUR_RESET"
@@ -25,7 +23,6 @@ tools_deb() {
 	$ECMD "$GREEN_LINE"
 	$ECMD "$GREEN_BULLET${aCOLOUR[2]}Updating Package ..."
 	$ECMD "$GREEN_LINE"
-
 		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools qrencode nmap dmidecode lolcat -qq -y
 	}
 
@@ -33,7 +30,6 @@ tools_rpm() {
 	$ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Updating Package ..."
         $ECMD "$GREEN_LINE"
-
                 yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
 	}
 
@@ -41,7 +37,6 @@ req() {
         $ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Requirements ..."
         $ECMD "$GREEN_LINE"
-
                 wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr
 	}
 
@@ -51,7 +46,7 @@ docker() {
         $ECMD "$GREEN_LINE"
 		DOCKR=$(which docker)
 			if [[ ! -z $DOCKR ]] ; then
-				 $ECMD "$RED_WARN${aCOLOUR[3]}Docker installed $COLOUR_RESET"
+				$ECMD "$RED_WARN${aCOLOUR[3]}Docker installed $COLOUR_RESET"
 			else
 				curl -sSL https://get.docker.com | sh
 			fi
@@ -82,6 +77,7 @@ SWAP_DIR="/var/swap"
 MEMM="dmidecode --type memory"
 
 swabcrod() {
+	cp /etc/fstab /etc/fstab.factory
 	chmod 600 $SWAP_DIR
 	mkswap $SWAP_DIR
 	swapon $SWAP_DIR
@@ -119,11 +115,11 @@ swabtes() {
 	}
 
 rpm() {
-	tools_rpm ; req ; lolcat ; docker ; ql ; onboot ; systemctl stop docker ; systemctl start docker ; systemctl enable docker ; swabtes ; reload >> install.log
+	tools_rpm ; req ; lolcat ; docker ; ql ; onboot ; systemctl stop docker ; systemctl start docker ; systemctl enable docker ; swabtes ; reload
 	}
 
 deb() {
-	tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/bin/lolcat ; swabtes ; reload >> install.log
+	tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/bin/lolcat ; swabtes ; reload
 	}
 
 #Detect root
@@ -153,5 +149,5 @@ fi
     		deb ; Q --about
 	else
     		$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
-    		exit 1 ;
+    		exit 1
  	fi

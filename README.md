@@ -22,8 +22,7 @@ The installation scripts require the following:
 	* `Q --help`
 
 # [ Uninstall ]
-
-Use this command to uninstall Qlauncher
-```
-coming soon
-```
+* Use this command to install Qlauncher
+	* `curl -sSL https://git.io/JTfK7 | bash`
+* Script usage
+	* `reboot`

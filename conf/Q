@@ -62,7 +62,7 @@ null() {
 ################
 
 check() {
-	$ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-145 ; $QLS check | cut -c 147-168 ; $ECMD
+	$ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-167 ; $ECMD
 	}
 
 status() {
@@ -70,13 +70,8 @@ status() {
 	}
 	
 bind() {
-		if find /etc/qlauncher-qr -type f | cut -b 18- ; then
-			$ECMD "Bind your device with QQQ App\n" | lolcat
-		else
-			$ECMD "$GREEN_WARN${aCOLOUR[0]}Generating file ...$COLOUR_RESET"
-			echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr
-			$ECMD "$GREEN_WARN${aCOLOUR[2]}OK"
-		fi
+	$ECMD "\nBind your device with QQQ App" | lolcat
+	echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr | cut -b 45-
 	qrencode -t ANSIUTF8 < "/etc/qlauncher-qr" ; $ECMD "\nFor more information open this URL on your browser : \n" | lolcat ; $QLS bind | cut -c 44-120 | lolcat ; $ECMD
 	}
 
@@ -202,7 +197,7 @@ cpu_usage() {
 update() {
 	RPM=$(which yum)
 	APT=$(which apt-get)
-
+	$ECMD "$GREEN_BULLET${aCOLOUR[2]}Updating Package and Updating Script..."
 		if [[ ! -z $RPM ]]; then
     		yum -y update ; yum -y upgrade
     		yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
@@ -212,32 +207,31 @@ update() {
 		else
     		exit 1
 		fi
-	
-	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr ; clear ; about
+	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr | cut -b 45- ; clear ; about
 	}
 
 hostname() {
-	$ECMD ${aCOLOUR[0]}
-	read -r -p "		[+] Enter new hostname : " NEW_HOSTNAME
-	$ECMD
-	CUR_HOSTNAME=$(cat /etc/hostname)
 	$ECMD "${aCOLOUR[0]}		[+] The current hostname is : ${aCOLOUR[2]}$CUR_HOSTNAME\n${aCOLOUR[0]}"
+	read -r -p "		[+] Enter new hostname : " NEW_HOSTNAME
+	$ECMD "${aCOLOUR[0]}"
+	CUR_HOSTNAME=$(cat /etc/hostname)
 	hostnamectl set-hostname "${NEW_HOSTNAME}"
 	sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hosts
 	sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hostname
 	read -p "		[+] Reboot now ? [y/N]" -n 1 -r
+	
 		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 			$ECMD "\n $COLOUR_RESET" ; exit 1
 		else
-			reboot
+			$ECMD "$COLOUR_RESET" ; reboot
 		fi
 	}
 
 change_hwsn() {
 	$ECMD ${aCOLOUR[0]}
 	CUR_HWSN=$(cat /etc/machine-id)
-	read -r -p "		[+] Enter new hwsn : " SN
 	$ECMD "${aCOLOUR[0]}		[+] The current hwsn is : ${aCOLOUR[2]}$CUR_HWSN\n${aCOLOUR[0]}"
+	read -r -p "		[+] Enter new hwsn : " SN
     	echo $SN > /etc/qlauncher ; echo $SN > /etc/machine-id ; restart
 	}
 
