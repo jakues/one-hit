@@ -61,9 +61,13 @@ null() {
 ## main usage ##
 ################
 
-check() { $ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-168 ; $ECMD }
+check() {
+	$ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-168 ; $ECMD
+	}
 
-status() { $ECMD ; docker ps -a --format "table {{.ID}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}" | lolcat ; $ECMD }
+status() {
+	$ECMD ; docker ps -a --format "table {{.ID}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}" | lolcat ; $ECMD
+	}
 	
 bind() {
 	$ECMD "\nBind your device with QQQ App" | lolcat

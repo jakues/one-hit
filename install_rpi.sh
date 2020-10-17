@@ -40,8 +40,7 @@ docker() {
 	$ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Docker ..."
         $ECMD "$GREEN_LINE"
-		DOCKR=$(which docker)
-			if [[ ! -z $DOCKR ]] ; then
+			if [[ ! -z $(which docker) ]] ; then
 				$ECMD "$RED_WARN${aCOLOUR[3]}Docker installed $COLOUR_RESET"
 			else
 				curl -sSL https://get.docker.com | sh
@@ -70,7 +69,9 @@ WantedBy=multi-user.target
 EOF
 	}
 
-reload() { systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload }
+reload() {
+	systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload
+	}
 
 cgroup_raspbian() {
 	CMDLINE_RASPBIAN=/boot/cmdline.txt
@@ -81,6 +82,28 @@ cgroup_ubuntu() {
 	CMDLINE_UBUNTU=/boot/firmware/cmdline.txt
 	sudo sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_UBUNTU
 	}
+
+#enable cgroup
+cgroup_go() {
+    	if $(ls /boot/cmdline.txt | cut -b 6969-) ; then
+		if $(cat /boot/cmdline.txt | grep "cgroup") ; then
+			$ECMD "$RED_WARN${aCOLOUR[3]}Cgroupfs already enabled.$COLOUR_RESET"
+			exit 1
+		else
+			cgroup_raspbian
+		fi
+	elif $(ls /boot/firmware/cmdline.txt | cut -b 6969-) ; then
+		if $(cat /boot/cmdline.txt | grep "cgroup") ; then
+			$ECMD "$RED_WARN${aCOLOUR[3]}Cgroupfs already enabled.$COLOUR_RESET"
+			exit 1
+		else
+			cgroup_ubuntu
+		fi
+	else
+		$ECMD "$RED_WARN${aCOLOUR[3]}Can't enable cgroupfs.$COLOUR_RESET"
+		$ECMD "$RED_WARN${aCOLOUR[3]}Please enable manually.$COLOUR_RESET"
+	fi
+    }
 
 #Detect root
 	if [[ $(id -u) -ne 0 ]] ; then
@@ -99,29 +122,9 @@ cgroup_ubuntu() {
 
 #kickoff
 		if [[ "$(tr -d '\0' < /proc/device-tree/model)" == *"Raspberry Pi"* ]]; then
-			tools ; req ; docker ; ql ; onboot ; reload ; Q --about
+			tools ; req ; docker ; ql ; onboot ; reload ; cgroup_go ; Q --about
 		else
 			$ECMD "$RED_WARN${aCOLOUR[3]}This is not a Raspberry Pi.$COLOUR_RESET"
 			exit 1
 		fi
-
-#enable cgroup
-	if $(ls /boot/cmdline.txt | cut -b 6969-) ; then
-		if $(cat /boot/cmdline.txt | grep "cgroup") ; then
-			$ECMD "$RED_WARN${aCOLOUR[3]}Cgroupfs already enabled.$COLOUR_RESET"
-			exit 1
-		else
-			cgroup_raspbian
-		fi
-	elif $(ls /boot/firmware/cmdline.txt | cut -b 6969-) ; then
-		if $(cat /boot/cmdline.txt | grep "cgroup") ; then
-			$ECMD "$RED_WARN${aCOLOUR[3]}Cgroupfs already enabled.$COLOUR_RESET"
-			exit 1
-		else
-			cgroup_ubuntu
-		fi
-	else
-		$ECMD "$RED_WARN${aCOLOUR[3]}Can't enable cgroupfs.$COLOUR_RESET"
-		$ECMD "$RED_WARN${aCOLOUR[3]}Please enable manually.$COLOUR_RESET"
-	fi
 

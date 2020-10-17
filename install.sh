@@ -44,8 +44,7 @@ docker() {
 	$ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Docker ..."
         $ECMD "$GREEN_LINE"
-		DOCKR=$(which docker)
-			if [[ ! -z $DOCKR ]] ; then
+			if [[ ! -z $(which docker) ]] ; then
 				$ECMD "$RED_WARN${aCOLOUR[3]}Docker installed $COLOUR_RESET"
 			else
 				curl -sSL https://get.docker.com | sh
@@ -96,9 +95,13 @@ cekswab() {
 	fi
 	}
 
-reload() { systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload }
+reload() {
+	systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload
+	}
 
-lolcat() { wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip }
+lolcat() {
+	wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip
+	}
 
 swabtes() {
 	if  ( 	[ "$(free | awk '/^Swap:/ { print $2 }')" = "0" ] ; [ "$(free --bytes | awk '/^Swap:/ { print $2 }')" -gt 2147483648 ] ) ;
@@ -124,7 +127,7 @@ if [[ $(id -u) -ne 0 ]] ; then
 	exit 1
 fi
 
-        #Fedora 31 and 32 can't install
+        #Fedora 31 and 32 can't install due docker-ce issue
         if cat /etc/os-release | grep ^PRETTY_NAME | grep 32 ; then
 	        $ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
 	        exit 1
