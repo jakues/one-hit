@@ -37,7 +37,7 @@ req() {
         $ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Requirements ..."
         $ECMD "$GREEN_LINE"
-                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr
+                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr ; ln -s /usr/games/lolcat /usr/bin/lolcat
 	}
 
 docker() {
@@ -118,7 +118,7 @@ rpm() {
 	}
 
 deb() {
-	tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/bin/lolcat ; swabtes ; reload
+	tools_deb ; req ; docker ; ql ; onboot ; swabtes ; reload
 	}
 
 #Detect root
