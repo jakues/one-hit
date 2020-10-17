@@ -61,13 +61,9 @@ null() {
 ## main usage ##
 ################
 
-check() {
-	$ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-167 ; $ECMD
-	}
+check() { $ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-168 ; $ECMD }
 
-status() {
-	$ECMD ; docker ps -a ; $ECMD
-	}
+status() { $ECMD ; docker ps -a --format "table {{.ID}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}" | lolcat ; $ECMD }
 	
 bind() {
 	$ECMD "\nBind your device with QQQ App" | lolcat
@@ -154,7 +150,7 @@ restart() {
 #################
 
 port() {
-	MYIP=$(ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$|\1|p' | head -1)
+	MYIP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
 	$ECMD ; nmap -p 443,32440-32449 $MYIP | lolcat ; $ECMD
 	}
 
@@ -188,7 +184,7 @@ rem() {
 	}
 
 cpu_usage() {
-	$ECMD "${aCOLOUR[2]}\nCpu usage\n"
+	$ECMD "${aCOLOUR[2]}\nTotal CPU Usage\n"
 	awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' \
 	<(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat)
 	$ECMD "$COLOUR_RESET"
@@ -230,18 +226,31 @@ hostname() {
 change_hwsn() {
 	$ECMD ${aCOLOUR[0]}
 	CUR_HWSN=$(cat /etc/machine-id)
-	$ECMD "${aCOLOUR[0]}		[+] The current hwsn is : ${aCOLOUR[2]}$CUR_HWSN\n${aCOLOUR[0]}"
+	$ECMD "${aCOLOUR[0]}		[+] The current hwsn is : ${aCOLOUR[2]}$CUR_HWSN${aCOLOUR[0]}"
 	read -r -p "		[+] Enter new hwsn : " SN
     	echo $SN > /etc/qlauncher ; echo $SN > /etc/machine-id ; restart
 	}
 
 pull_requirements() {
-	docker pull -q docker-registry.poseidon.network/qlauncher-sysinfo-updater:0.3.3
-	docker pull -q docker-registry.poseidon.network/qservice-transcoding-x86:0.1.0
-	docker pull -q docker-registry.poseidon.network/qservice-nginx-x86:0.2.4
-	docker pull -q docker-registry.poseidon.network/qservice-v2ray:0.0.4
-	docker pull -q ipfs/go-ipfs:v0.4.23
-	docker pull -q kubeedge/pause:3.1
+	MODELO=$(uname -m)
+	if [[ "${MODELO}" == *"x86"* ]] ; then
+		docker pull -q docker-registry.poseidon.network/qlauncher-sysinfo-updater:0.3.3
+		docker pull -q docker-registry.poseidon.network/qservice-transcoding-x86:0.1.0
+		docker pull -q docker-registry.poseidon.network/qservice-nginx-x86:0.2.4
+		docker pull -q docker-registry.poseidon.network/qservice-v2ray:0.0.4
+		docker pull -q ipfs/go-ipfs:v0.4.23
+		docker pull -q kubeedge/pause:3.1
+	elif [[ "${MODELO}" == *"armv7l"* ]] ; then
+		docker pull -q docker-registry.poseidon.network/qlauncher-sysinfo-updater-arm:0.3.3
+		docker pull -q docker-registry.poseidon.network/qservice-transcoding-arm:0.1.0
+		docker pull -q docker-registry.poseidon.network/qservice-nginx-arm:0.2.4
+		docker pull -q docker-registry.poseidon.network/qservice-v2ray-arm:0.0.4
+		docker pull -q yrzr/go-ipfs-arm32v7:latest
+		docker pull -q kubeedge/pause-arm:3.1
+		docker tag yrzr/go-ipfs-arm32v7:latest yrzr/go-ipfs-arm32v7:v0.4.23
+	elif [[ "${MODELO}" == *"aarch64"* ]] ; then
+		$ECMD "$RED_WARN${aCOLOUR[3]}Currently Qlauncher doesn't support arm64.$COLOUR_RESET"
+	fi
 	}
 
 force_pull() {
@@ -256,7 +265,7 @@ force_pull() {
 				sleep $delay
 			done
 				$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]}
-				read -p "		[+] Are you want to check it ? [y/N]" -n 1 -r
+				read -p "		[+] Check docker image now ? [y/N]" -n 1 -r
 				$ECMD "$COLOUR_RESET"
 		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 			$ECMD "\n $COLOUR_RESET" ; exit 1
@@ -296,7 +305,7 @@ restart
 check | lolcat
 ;;
  -l|--status)
-status | lolcat
+status
 ;;
  -b|--bind)
 bind

@@ -96,13 +96,9 @@ cekswab() {
 	fi
 	}
 
-reload() {
-	systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload
-	}
+reload() { systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload }
 
-lolcat() {
-	wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip
-}
+lolcat() { wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip }
 
 swabtes() {
 	if  ( 	[ "$(free | awk '/^Swap:/ { print $2 }')" = "0" ] ; [ "$(free --bytes | awk '/^Swap:/ { print $2 }')" -gt 2147483648 ] ) ;
@@ -135,9 +131,14 @@ fi
         fi
 
         if cat /etc/os-release | grep ^PRETTY_NAME | grep 31 ; then
-                $ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
+		$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
                 exit 1
         fi
+	
+        if [[ "$(tr -d '\0' < /proc/device-tree/model)" == *"Raspberry Pi"* ]]; then
+		$ECMD "$RED_WARN${aCOLOUR[3]}Raspberry Pi detected$COLOUR_RESET"
+		$ECMD "$GREEN_WARN${aCOLOUR[2]}For Raspberry Pi use https://github.com/jakues/ql-rpi$COLOUR_RESET"
+	fi
 
 #kickoff
   RPM=$(which yum)
