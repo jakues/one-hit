@@ -32,7 +32,7 @@ The installation scripts require the following:
 
 
 # [ Uninstall ]
-* Use this command to install Qlauncher
+* Use this command to uninstall Qlauncher
 	* `curl -sSL https://git.io/JTfK7 | bash`
-* Script usage
+* Then rebooot it and duarrrrrr
 	* `reboot`
