@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#////////////////////////////////////
-# ql-installer
-# langsung crot
-#////////////////////////////////////
+# Description	: Script to install Qlauncher.
+# Author		: Rill (jakueenak@gmail.com)
+# Telegram		: t.me/pethot
+# Version		: beta
 
 ECMD="echo -e"
 COLOUR_RESET='\e[0m'
@@ -37,7 +37,7 @@ req() {
         $ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Requirements ..."
         $ECMD "$GREEN_LINE"
-                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr ; ln -s /usr/games/lolcat /usr/bin/lolcat
+                wget https://git.io/JUEI8 -O ql.tar.gz ; wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; $ECMD "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr | cut -b 45- ; ln -s /usr/games/lolcat /usr/bin/lolcat
 	}
 
 docker() {
@@ -47,7 +47,7 @@ docker() {
 			if [[ ! -z $(which docker) ]] ; then
 				$ECMD "$RED_WARN${aCOLOUR[3]}Docker installed $COLOUR_RESET"
 			else
-				curl -sSL https://get.docker.com | sh
+				curl -sSL https://get.docker.com | bash
 			fi
 	}
 
@@ -55,7 +55,7 @@ ql() {
         $ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Installing Qlauncher ..."
         $ECMD "$GREEN_LINE"
-	mkdir -p /etc/ql ; tar -vxzf ql.tar.gz -C /etc/ql ; rm ql.tar.gz
+			mkdir -p /etc/ql ; tar -vxzf ql.tar.gz -C /etc/ql ; rm ql.tar.gz
 	}
 
 onboot() {
@@ -75,7 +75,7 @@ EOF
 SWAP_DIR="/var/swap"
 MEMM="dmidecode --type memory"
 
-swabcrod() {
+swabb() {
 	cp /etc/fstab /etc/fstab.factory
 	chmod 600 $SWAP_DIR
 	mkswap $SWAP_DIR
@@ -85,13 +85,13 @@ swabcrod() {
 
 cekswab() {
 	if ( $MEMM | grep "Size: 1024 MB" ) ; then
-		fallocate -l 2069M $SWAP_DIR ; swabcrod
+		fallocate -l 2069M $SWAP_DIR ; swabb
 	elif ( $MEMM | grep "Size: 2048 MB" ) ; then
-		fallocate -l 1069M $SWAP_DIR ; swabcrod
+		fallocate -l 1069M $SWAP_DIR ; swabb
 	elif ( $MEMM | grep "Size: 4096 MB" ) ; then
-		fallocate -l 769M $SWAP_DIR ; swabcrod
+		fallocate -l 769M $SWAP_DIR ; swabb
 	else
-		fallocate -l 469M $SWAP_DIR ; swabcrod
+		fallocate -l 469M $SWAP_DIR ; swabb
 	fi
 	}
 
@@ -113,40 +113,65 @@ swabtes() {
 	fi
 	}
 
-rpm() {
-	tools_rpm ; req ; lolcat ; docker ; ql ; onboot ; systemctl stop docker ; systemctl start docker ; systemctl enable docker ; swabtes ; reload
+CMDLINE_RASPBIAN=/boot/cmdline.txt
+CMDLINE_UBUNTU=/boot/firmware/cmdline.txt
+MODELO=$(uname -m)
+
+cgroup_raspbian() {
+	sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_RASPBIAN
 	}
 
-deb() {
-	tools_deb ; req ; docker ; ql ; onboot ; swabtes ; reload
+cgroup_ubuntu() {
+	sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_UBUNTU
 	}
 
-#Detect root
-if [[ $(id -u) -ne 0 ]] ; then
-        $ECMD "$GREEN_WARN${aCOLOUR[3]}Please run as root $COLOUR_RESET"
-	exit 1
-fi
-
-        #Fedora 31 and 32 can't install due docker-ce issue
-        if cat /etc/os-release | grep ^PRETTY_NAME | grep 32 ; then
-	        $ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
-	        exit 1
+cgroupfs() {
+	if $(cat /etc/os-release | grep debian | cut -b 69-) ; then
+		if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
+			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
+		else
+			cgroup_raspbian
         fi
-
-        if cat /etc/os-release | grep ^PRETTY_NAME | grep 31 ; then
-		$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
-                exit 1
+	elif $(cat /etc/os-release | grep ubuntu | cut -b 69-) ; then
+        if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
+			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
+        else
+          cgroup_ubuntu
         fi
-	
-        if [[ "$(tr -d '\0' < /proc/device-tree/model)" == *"Raspberry Pi"* ]]; then
-		$ECMD "$RED_WARN${aCOLOUR[3]}Raspberry Pi detected$COLOUR_RESET"
-		$ECMD "$GREEN_WARN${aCOLOUR[2]}For Raspberry Pi use https://github.com/jakues/ql-rpi$COLOUR_RESET"
+	else
+		$ECMD "$RED_WARN${aCOLOUR[3]}Can't enable cgroupfs.$COLOUR_RESET"
+		$ECMD "$RED_WARN${aCOLOUR[3]}Please enable manually.$COLOUR_RESET"
 	fi
+	}
 
-#kickoff
-  RPM=$(which yum)
-  APT=$(which apt-get)
+check_arch_rpi() {
+	if [ "${MODELO}" != "armv7l" ]; then
+		$ECMD "$RED_WARN${aCOLOUR[3]}This script is only intended to run on ARM devices.$COLOUR_RESET"
+		exit 1
+	elif [[ "${MODELO}" == *"aarch64"* ]] ; then
+		$ECMD "$RED_WARN${aCOLOUR[3]}Currently Qlauncher doesn't support arm64.$COLOUR_RESET"
+	fi
+	}
 
+reboot_rpi() {
+	read -p "  [+] Reboot now to enable cgroupfs ? [y/N]" -n 1 -r
+		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+			$ECMD "\n $COLOUR_RESET" ; exit 1
+		else
+			$ECMD "$COLOUR_RESET" ; reboot
+		fi
+	}
+
+rpm() { tools_rpm ; lolcat ; req ; docker ; ql ; onboot ; systemctl restart docker ; systemctl enable docker ; swabtes ; reload ; }
+
+deb() { tools_deb ; req ; docker ; ql ; onboot ; swabtes ; reload ; }
+
+rpi() { tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q ; reload ; cgroupfs ; }
+	
+RPM=$(which yum)
+APT=$(which apt-get)
+	
+regular() {
 	if [[ ! -z $RPM ]]; then
     		rpm ; Q --about
 	elif [[ ! -z $APT ]]; then
@@ -155,3 +180,28 @@ fi
     		$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
     		exit 1
  	fi
+	}
+	
+#Detect root
+if [[ $(id -u) -ne 0 ]] ; then
+        $ECMD "$GREEN_WARN${aCOLOUR[3]}Please run as root $COLOUR_RESET"
+	exit 1
+fi
+
+#Fedora 31 and 32 can't install due docker-ce issue
+if cat /etc/os-release | grep ^PRETTY_NAME | grep 32 ; then
+	$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
+	exit 1
+fi
+
+if cat /etc/os-release | grep ^PRETTY_NAME | grep 31 ; then
+	$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
+	exit 1
+fi
+
+#Detect architecture
+if [[ "${MODELO}" == *"x86_64"* ]] ; then
+	regular
+elif [[ "$(tr -d '\0' < /proc/device-tree/model)" == *"Raspberry Pi"* ]] ; then
+	check_arch_rpi ; rpi ; reboot_rpi
+fi

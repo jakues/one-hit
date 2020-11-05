@@ -7,7 +7,7 @@ It automatically downloads and installs the following packages:
 * net-tools
 * lolcat 😋
 * qrencode
-* Qlauncher (Latest)
+* latest qlauncher
 
 
 # [ Prerequisites ]
@@ -18,15 +18,13 @@ The installation scripts require the following:
 	* [Raspberry Pi OS](https://downloads.raspberrypi.org/raspios_lite_armhf_latest)
 	* [DietPi](https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Buster.7z)
 	* [Ubuntu server 32 bit](https://ubuntu.com/download/raspberry-pi)
-* Run as root user.
+* Run as **root** user.
+* `curl` package installed.
 
 
 # [ Install ]
-* Use this command to install Qlauncher on x86
+* Use this command to install Qlauncher
 	* `curl -sSL https://git.io/JUxCs | bash`
-* Use this command to install Qlauncher on Raspberry Pi
-	* To install `curl -sSL https://git.io/JTcnm | bash`
-	* Need `reboot` to activate cgroupfs
 * Script usage
 	* `Q --help`
 
