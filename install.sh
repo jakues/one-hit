@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Description	: Script to install Qlauncher.
+# Description		: Script to install Qlauncher.
 # Author		: Rill (jakueenak@gmail.com)
 # Telegram		: t.me/pethot
 # Version		: beta
@@ -95,13 +95,9 @@ cekswab() {
 	fi
 	}
 
-reload() {
-	systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload
-	}
+reload() { systemctl enable qlauncher ; systemctl start qlauncher ; systemctl daemon-reload ; }
 
-lolcat() {
-	wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip
-	}
+lolcat() { wget https://github.com/busyloop/lolcat/archive/master.zip ; unzip master.zip ; cd lolcat-master/bin ; gem install lolcat ; ln -s /usr/games/lolcat /usr/bin/lolcat ; cd ; rm -rf lolcat-master master.zip ; }
 
 swabtes() {
 	if  ( 	[ "$(free | awk '/^Swap:/ { print $2 }')" = "0" ] ; [ "$(free --bytes | awk '/^Swap:/ { print $2 }')" -gt 2147483648 ] ) ;
@@ -117,13 +113,9 @@ CMDLINE_RASPBIAN=/boot/cmdline.txt
 CMDLINE_UBUNTU=/boot/firmware/cmdline.txt
 MODELO=$(uname -m)
 
-cgroup_raspbian() {
-	sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_RASPBIAN
-	}
+cgroup_raspbian() { sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_RASPBIAN ; }
 
-cgroup_ubuntu() {
-	sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_UBUNTU
-	}
+cgroup_ubuntu() { sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 rootwait/' $CMDLINE_UBUNTU ; }
 
 cgroupfs() {
 	if $(cat /etc/os-release | grep debian | cut -b 69-) ; then
@@ -131,13 +123,13 @@ cgroupfs() {
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
 		else
 			cgroup_raspbian
-        fi
+        	fi
 	elif $(cat /etc/os-release | grep ubuntu | cut -b 69-) ; then
-        if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
+        	if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
-        else
-          cgroup_ubuntu
-        fi
+        	else
+          		cgroup_ubuntu
+		fi
 	else
 		$ECMD "$RED_WARN${aCOLOUR[3]}Can't enable cgroupfs.$COLOUR_RESET"
 		$ECMD "$RED_WARN${aCOLOUR[3]}Please enable manually.$COLOUR_RESET"
@@ -167,10 +159,10 @@ rpm() { tools_rpm ; lolcat ; req ; docker ; ql ; onboot ; systemctl restart dock
 deb() { tools_deb ; req ; docker ; ql ; onboot ; swabtes ; reload ; }
 
 rpi() { tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q ; reload ; cgroupfs ; }
-	
+
 RPM=$(which yum)
 APT=$(which apt-get)
-	
+
 regular() {
 	if [[ ! -z $RPM ]]; then
     		rpm ; Q --about
@@ -181,7 +173,7 @@ regular() {
     		exit 1
  	fi
 	}
-	
+
 #Detect root
 if [[ $(id -u) -ne 0 ]] ; then
         $ECMD "$GREEN_WARN${aCOLOUR[3]}Please run as root $COLOUR_RESET"
@@ -192,9 +184,7 @@ fi
 if cat /etc/os-release | grep ^PRETTY_NAME | grep 32 ; then
 	$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
 	exit 1
-fi
-
-if cat /etc/os-release | grep ^PRETTY_NAME | grep 31 ; then
+elif cat /etc/os-release | grep ^PRETTY_NAME | grep 31 ; then
 	$ECMD "$RED_WARN${aCOLOUR[3]}Can't install $COLOUR_RESET"
 	exit 1
 fi

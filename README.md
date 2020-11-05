@@ -19,7 +19,7 @@ The installation scripts require the following:
 	* [DietPi](https://dietpi.com/downloads/images/DietPi_RPi-ARMv6-Buster.7z)
 	* [Ubuntu server 32 bit](https://ubuntu.com/download/raspberry-pi)
 * Run as **root** user.
-* `curl` package installed.
+* Package `curl` installed.
 
 
 # [ Install ]
