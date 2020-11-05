@@ -11,7 +11,7 @@ aCOLOUR=(
 		'\e[1;33m'	# Yellow
 		'\e[1m'		# Bold white
 		'\e[1;32m'	# Green
-		'\e[1;31m'  # Red
+		'\e[1;31m'      # Red
 	)
 
 	GREEN_LINE="${aCOLOUR[0]}──────────────────────────────────────────────────────────$COLOUR_RESET"
@@ -119,13 +119,13 @@ cgroup_ubuntu() { sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memor
 
 cgroupfs() {
 	if $(cat /etc/os-release | grep debian | cut -b 69-) ; then
-		if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
+		if $(cat /boot/cmdline.txt | grep "cgroup" >/dev/null) ; then
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
 		else
 			cgroup_raspbian
         	fi
 	elif $(cat /etc/os-release | grep ubuntu | cut -b 69-) ; then
-        	if $(cat /boot/cmdline.txt | grep "cgroup" | cut -b 696-) ; then
+        	if $(cat /boot/cmdline.txt | grep "cgroup" >/dev/null) ; then
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
         	else
           		cgroup_ubuntu
