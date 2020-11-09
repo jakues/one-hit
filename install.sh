@@ -119,13 +119,13 @@ cgroup_ubuntu() { sed -i -e 's/rootwait/cgroup_enable=cpuset cgroup_enable=memor
 
 cgroupfs() {
 	if $(cat /etc/os-release | grep debian | cut -b 69-) ; then
-		if $(cat /boot/cmdline.txt | grep "cgroup" >/dev/null) ; then
+		if $(cat ${CMDLINE_RASPBIAN} | grep "cgroup" >/dev/null) ; then
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
 		else
 			cgroup_raspbian
         	fi
 	elif $(cat /etc/os-release | grep ubuntu | cut -b 69-) ; then
-        	if $(cat /boot/cmdline.txt | grep "cgroup" >/dev/null) ; then
+        	if $(cat ${CMDLINE_UBUNTU} | grep "cgroup" >/dev/null) ; then
 			$ECMD "$RED_WARN${aCOLOUR[2]}Cgroupfs already enabled.$COLOUR_RESET"
         	else
           		cgroup_ubuntu
@@ -133,6 +133,7 @@ cgroupfs() {
 	else
 		$ECMD "$RED_WARN${aCOLOUR[3]}Can't enable cgroupfs.$COLOUR_RESET"
 		$ECMD "$RED_WARN${aCOLOUR[3]}Please enable manually.$COLOUR_RESET"
+		exit 1
 	fi
 	}
 
@@ -158,7 +159,7 @@ rpm() { tools_rpm ; lolcat ; req ; docker ; ql ; onboot ; systemctl restart dock
 
 deb() { tools_deb ; req ; docker ; ql ; onboot ; swabtes ; reload ; }
 
-rpi() { tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q ; reload ; cgroupfs ; }
+rpi() { tools_deb ; req ; docker ; ql ; onboot ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q ; reload ; cgroupfs ; Q --about ; }
 
 RPM=$(which yum)
 APT=$(which apt-get)

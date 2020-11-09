@@ -11,7 +11,7 @@ aCOLOUR=(
 		'\e[1;33m'	# Yellow
 		'\e[1m'		# Bold white
 		'\e[1;32m'	# Green
-		'\e[1;31m'  # Red
+		'\e[1;31m'  	# Red
 	)
 
 	GREEN_LINE="${aCOLOUR[0]}──────────────────────────────────────────────────────────$COLOUR_RESET"

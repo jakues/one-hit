@@ -35,10 +35,11 @@ help() {
 	$ECMD "    -c, --stop		stop Qlauncher service"
 	$ECMD "    -r, --restart	restart Qlauncher service"
 	$ECMD "    -i, --check		check Qlauncher tick"
-	$ECMD "    -l, --status	show status container"
+	$ECMD "    -l, --stat	show status container"
 	$ECMD "    -b, --bind		get Qlauncher QR Code"
 	$ECMD "\n  Miscellaneous :"
-	$ECMD "    -p, --port		check port status"
+	$ECMD "    -P			check port status based nmap"
+	$ECMD "    -p, --port		check port status based on query-api"
 	$ECMD "    -d, --rem		remove 'Exited' container"
 	$ECMD "    -j, --cpu		show total cpu usage"
 	$ECMD "    -up, --update	update script"
@@ -60,14 +61,10 @@ null() {
 ## main usage ##
 ################
 
-check() {
-	$ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-168 ; $ECMD
-	}
+check() { $ECMD ; $QLS check | cut -c 2-26 ; $QLS check | cut -c 28-68 ; $QLS check | cut -c 70-96 ; $QLS check | cut -c 98-120 ; $QLS check | cut -c 122-144 ; $QLS check | cut -c 146-168 ; $ECMD ; }
 
-status() {
-	$ECMD ; docker ps -a --format "table {{.ID}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}" | lolcat ; $ECMD
-	}
-	
+status() { $ECMD ; docker ps -a --format "table {{.ID}}\t{{.Status}}\t{{.Names}}\t{{.Ports}}" | lolcat ; $ECMD ; }
+
 bind() {
 	$ECMD "\nBind your device with QQQ App" | lolcat
 	$ECMD "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr | cut -b 45-
@@ -79,51 +76,51 @@ ECMN="echo -en"
 
 start() {
 	if [[ ! $TRUE ]] ; then
-      $ECMD ${aCOLOUR[2]} ; $QLS start >/dev/null 2>&1 > /var/log/Q &
-      $ECMN "		[+] Starting Qlauncher ...  "
-      PID=$!
-      delay=${SPINNER_DELAY:-0.25}
-      i=1
-      sp="/-\|"
+		$ECMD ${aCOLOUR[2]} ; $QLS start >/dev/null 2>&1 > /var/log/Q &
+		$ECMN "		[+] Starting Qlauncher ...  "
+      		PID=$!
+      		delay=${SPINNER_DELAY:-0.25}
+      		i=1
+      		sp="/-\|"
 		while [ -d /proc/$PID ] ; do
-			printf "\b${sp:i++%${#sp}:1}"
-			sleep $delay
+		  printf "\b${sp:i++%${#sp}:1}"
+		  sleep $delay
 		done
-			$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]}
-			read -p "		[?] Are you want to check it ? [y/N]" -n 1 -r
-			$ECMD "$COLOUR_RESET"
-		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-			$ECMD "$COLOUR_RESET" ; exit 1
-		else
-			$ECMD ; check | lolcat ; $ECMD
-		fi
+		$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]}
+		read -p "		[?] Are you want to check it ? [y/N]" -n 1 -r
+		$ECMD "$COLOUR_RESET"
+			if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+				$ECMD "$COLOUR_RESET" ; exit 1
+			else
+				$ECMD ; check | lolcat ; $ECMD
+			fi
 	else
-      $ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Already Running $COLOUR_RESET\n" ; exit 1
+		$ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Already Running $COLOUR_RESET\n" ; exit 1
 	fi
 	}
 
 stop() {
 	if [[ $TRUE ]] ; then
-      $ECMD ${aCOLOUR[0]} ; $QLS stop >/dev/null 2>&1 > /var/log/Q &
-      $ECMN "		[+] Stopping Qlauncher ...  "
-      PID=$!
-      delay=${SPINNER_DELAY:-0.25}
-      i=1
-      sp="/-\|"
+		$ECMD ${aCOLOUR[0]} ; $QLS stop >/dev/null 2>&1 > /var/log/Q &
+		$ECMN "		[+] Stopping Qlauncher ...  "
+		PID=$!
+		delay=${SPINNER_DELAY:-0.25}
+		i=1
+		sp="/-\|"
 		while [ -d /proc/$PID ] ; do
 			printf "\b${sp:i++%${#sp}:1}"
 			sleep $delay
 		done
-			$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]}
-			read -p "		[?] Are you want to check it ? [y/N]" -n 1 -r
-			$ECMD "$COLOUR_RESET"
-		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-			$ECMD "$COLOUR_RESET" ; exit 1
-		else
-			$ECMD "		[+] $(check | grep "edgecore_alive" )\n" | lolcat
-		fi
+		$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]}
+		read -p "		[?] Are you want to check it ? [y/N]" -n 1 -r
+		$ECMD "$COLOUR_RESET"
+			if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
+				$ECMD "$COLOUR_RESET" ; exit 1
+			else
+				$ECMD "		[+] $(check | grep "edgecore_alive" )\n" | lolcat
+			fi
 	else
-      $ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Not Running $COLOUR_RESET\n" ; exit 1
+		$ECMD "\n$RED_WARN${aCOLOUR[3]}Qlauncher Not Running $COLOUR_RESET\n" ; exit 1
 	fi
 	}
 
@@ -152,9 +149,74 @@ restart() {
 ##Miscellaneous##
 #################
 
-port() {
-	MYIP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
-	$ECMD ; nmap -p 443,32440-32449 $MYIP | lolcat ; $ECMD
+MYIP=$(wget -t 3 -T 15 -qO- http://ipv4.icanhazip.com)
+
+port() { $ECMD ; nmap -p 443,32440-32449 $MYIP | lolcat ; $ECMD ; }
+
+HWSN=$(cat /etc/qlauncher)
+URL=https://edms.poseidon.network/qlauncher/${HWSN}/
+
+NGINX_443=$(curl -s "${URL}" | grep -Poe '(?<=is_enabled": ).*(?=, "port": 443)')
+IPFS=$(curl -s "${URL}" | grep -Poe '(?<=ipfs", "is_enabled": ).*(?=, "port": 32440)')
+IPFS_GATEWAY=$(curl -s "${URL}" | grep -Poe '(?<=ipfs-gateway", "is_enabled": ).*(?=, "port": 32441)')
+SYSINFO=$(curl -s "${URL}" | grep -Poe '(?<=sysinfo", "is_enabled": ).*(?=, "port": 32442)')
+V2RAY=$(curl -s "${URL}" | grep -Poe '(?<=v2ray", "is_enabled": ).*(?=, "port": 32443)')
+IPFS_SWARM=$(curl -s "${URL}" | grep -Poe '(?<=ipfs-swarm", "is_enabled": ).*(?=, "port": 32445)')
+NGINX_32446=$(curl -s "${URL}" | grep -Poe '(?<=nginx", "is_enabled": ).*(?=, "port": 32446)')
+TRANSCODING=$(curl -s "${URL}" | grep -Poe '(?<=transcoding", "is_enabled": ).*(?=, "port": 32449)')
+
+CC=close
+CO=open
+
+port_api() {
+	if [[ "${NGINX_443}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} nginx/443          : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} nginx/443          : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${IPFS}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} ipfs/32440         : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} ipfs/32440         : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${IPFS_GATEWAY}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} ipfs-gateway/32441 : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} ipfs-gateway/32441 : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${SYSINFO}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} sysinfo/32442      : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} sysinfo/32442      : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${V2RAY}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} v2ray/32443        : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} v2ray/32443        : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${IPFS_SWARM}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} ipfs-swarm/32445   : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} ipfs-swarm/32445   : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${NGINX_32446}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} nginx/32446        : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} nginx/32446        : ${CC}$COLOUR_RESET"
+	fi
+
+	if [[ "${TRANSCODING}" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} transcoding/32449  : ${CO}$COLOUR_RESET"
+	else
+        	$ECMD "${aCOLOUR[2]} transcoding/32449  : ${CC}$COLOUR_RESET"
+	fi
+
 	}
 
 rem() {
@@ -197,22 +259,19 @@ update() {
 	RPM=$(which yum)
 	APT=$(which apt-get)
 		if [[ ! -z $RPM ]]; then
-    		yum -y update ; yum -y upgrade
-    		yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
+			yum update -y ; yum upgrade -y ; yum install epel-release wget net-tools qrencode ruby nmap dmidecode unzip -y
 		elif [[ ! -z $APT ]]; then
-    		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get autoremove -qq -y
-    		apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools qrencode nmap dmidecode lolcat -qq -y
+    			apt-get update -qq -y ; apt-get upgrade -qq -y ; apt-get install wget net-tools qrencode nmap dmidecode lolcat -qq -y
 		else
-    		exit 1
+    			exit 1
 		fi
 	ln -s /usr/games/lolcat /usr/bin/lolcat ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q
-	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-$(cat /etc/machine-id)" | tee /etc/qlauncher-qr | cut -b 45-
+	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-${HWSN}" | tee /etc/qlauncher-qr | cut -b 45-
 	}
 
 do_update() {
-	
 		$ECMD ${aCOLOUR[0]} ; update >/dev/null 2>&1 > /var/log/Q &
-		$ECMN "		[+] Updating Script ...  "
+		$ECMN "	[+] Updating Script ...  "
 		PID=$!
 		delay=${SPINNER_DELAY:-0.25}
 		i=1
@@ -221,7 +280,7 @@ do_update() {
 				printf "\b${sp:i++%${#sp}:1}"
 				sleep $delay
 			done
-				$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]} ; sleep 5 ; clear ; about
+		$ECMD "\n$GREEN_WARN${aCOLOUR[2]}OK" ; $ECMD ${aCOLOUR[0]} ; sleep 5 ; clear ; about
 	}
 
 hostname() {
@@ -233,7 +292,6 @@ hostname() {
 	sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hosts
 	sudo sed -i "s/$CUR_HOSTNAME/$NEW_HOSTNAME/g" /etc/hostname
 	read -p "		[+] Reboot now ? [y/N]" -n 1 -r
-	
 		if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
 			$ECMD "\n $COLOUR_RESET" ; exit 1
 		else
@@ -251,7 +309,7 @@ change_hwsn() {
 
 pull_requirements() {
 	MODELO=$(uname -m)
-	if [[ "${MODELO}" == *"x86"* ]] ; then
+	if [[ "${MODELO}" == *"x86_64"* ]] ; then
 		docker pull -q docker-registry.poseidon.network/qlauncher-sysinfo-updater:0.5.0
 		docker pull -q docker-registry.poseidon.network/qservice-transcoding-x86:0.1.0
 		docker pull -q docker-registry.poseidon.network/qservice-nginx-x86:0.2.4
@@ -321,14 +379,17 @@ restart
  -i|--check)
 check | lolcat
 ;;
- -l|--status)
+ -l|--stat)
 status
 ;;
  -b|--bind)
 bind
 ;;
- -p|--port)
+ -P)
 port
+;;
+ -p|--port)
+port_api
 ;;
  -d|--rem)
 rem
