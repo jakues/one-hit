@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#////////////////////////////////////
-#qlauncher cap kadal
-#////////////////////////////////////
+# Description	: Topping for qlauncher.
+# Author		: Rill (jakueenak@gmail.com)
+# Telegram		: t.me/pethot
+# Version		: beta
 
 ECMD="echo -e"
 COLOUR_RESET='\e[0m'
@@ -35,7 +36,7 @@ help() {
 	$ECMD "    -c, --stop		stop Qlauncher service"
 	$ECMD "    -r, --restart	restart Qlauncher service"
 	$ECMD "    -i, --check		check Qlauncher tick"
-	$ECMD "    -l, --stat	show status container"
+	$ECMD "    -l, --stat		show status container"
 	$ECMD "    -b, --bind		get Qlauncher QR Code"
 	$ECMD "\n  Miscellaneous :"
 	$ECMD "    -P			check port status based nmap"
@@ -155,68 +156,70 @@ port() { $ECMD ; nmap -p 443,32440-32449 $MYIP | lolcat ; $ECMD ; }
 
 HWSN=$(cat /etc/qlauncher)
 URL=https://edms.poseidon.network/qlauncher/${HWSN}/
-
-NGINX_443=$(curl -s "${URL}" | grep -Poe '(?<=is_enabled": ).*(?=, "port": 443)')
-IPFS=$(curl -s "${URL}" | grep -Poe '(?<=ipfs", "is_enabled": ).*(?=, "port": 32440)')
-IPFS_GATEWAY=$(curl -s "${URL}" | grep -Poe '(?<=ipfs-gateway", "is_enabled": ).*(?=, "port": 32441)')
-SYSINFO=$(curl -s "${URL}" | grep -Poe '(?<=sysinfo", "is_enabled": ).*(?=, "port": 32442)')
-V2RAY=$(curl -s "${URL}" | grep -Poe '(?<=v2ray", "is_enabled": ).*(?=, "port": 32443)')
-IPFS_SWARM=$(curl -s "${URL}" | grep -Poe '(?<=ipfs-swarm", "is_enabled": ).*(?=, "port": 32445)')
-NGINX_32446=$(curl -s "${URL}" | grep -Poe '(?<=nginx", "is_enabled": ).*(?=, "port": 32446)')
-TRANSCODING=$(curl -s "${URL}" | grep -Poe '(?<=transcoding", "is_enabled": ).*(?=, "port": 32449)')
-
 CC=close
 CO=open
 
-port_api() {
-	if [[ "${NGINX_443}" == *"true"* ]] ; then
-        	$ECMD "${aCOLOUR[2]} nginx/443          : ${CO}$COLOUR_RESET"
+port_api() {	
+	curl -s ${URL} | tee /etc/qlauncher-query >/dev/null
+	
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=is_enabled": ).*(?=, "port": 443)')" == *"true"* ]] ; then
+        	$ECMD "\n${aCOLOUR[2]} nginx/443          : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} nginx/443          : ${CC}$COLOUR_RESET"
+        	$ECMD "\n${aCOLOUR[3]} nginx/443          : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${IPFS}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=ipfs", "is_enabled": ).*(?=, "port": 32440)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} ipfs/32440         : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} ipfs/32440         : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} ipfs/32440         : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${IPFS_GATEWAY}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=ipfs-gateway", "is_enabled": ).*(?=, "port": 32441)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} ipfs-gateway/32441 : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} ipfs-gateway/32441 : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} ipfs-gateway/32441 : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${SYSINFO}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=sysinfo", "is_enabled": ).*(?=, "port": 32442)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} sysinfo/32442      : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} sysinfo/32442      : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} sysinfo/32442      : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${V2RAY}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=v2ray", "is_enabled": ).*(?=, "port": 32443)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} v2ray/32443        : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} v2ray/32443        : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} v2ray/32443        : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${IPFS_SWARM}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=ipfs-swarm", "is_enabled": ).*(?=, "port": 32445)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} ipfs-swarm/32445   : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} ipfs-swarm/32445   : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} ipfs-swarm/32445   : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${NGINX_32446}" == *"true"* ]] ; then
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=nginx", "is_enabled": ).*(?=, "port": 32446)')" == *"true"* ]] ; then
         	$ECMD "${aCOLOUR[2]} nginx/32446        : ${CO}$COLOUR_RESET"
 	else
-        	$ECMD "${aCOLOUR[2]} nginx/32446        : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} nginx/32446        : ${CC}$COLOUR_RESET"
 	fi
 
-	if [[ "${TRANSCODING}" == *"true"* ]] ; then
-        	$ECMD "${aCOLOUR[2]} transcoding/32449  : ${CO}$COLOUR_RESET"
+	if [[ "$(cat /etc/qlauncher-query | grep -Poe '(?<=transcoding", "is_enabled": ).*(?=, "port": 32449)')" == *"true"* ]] ; then
+        	$ECMD "${aCOLOUR[2]} transcoding/32449  : ${CO}$COLOUR_RESET\n"
 	else
-        	$ECMD "${aCOLOUR[2]} transcoding/32449  : ${CC}$COLOUR_RESET"
+        	$ECMD "${aCOLOUR[3]} transcoding/32449  : ${CC}$COLOUR_RESET\n"
 	fi
+	}
 
+do_port_api() {
+	$ECMD "\nStarting port check at $(date -u)" | lolcat
+	$ECMD "For device : ${HWSN}" | lolcat
+	$ECMD "Public ip  : ${MYIP}" | lolcat
+	read up rest </proc/uptime; t1="${up%.*}${up#*.}"
+	port_api
+	read up rest </proc/uptime; t2="${up%.*}${up#*.}"
+	MS=$(( 10*(t2-t1) ))
+	$ECMD "Port check done in ${MS} ms.\n" | lolcat
 	}
 
 rem() {
@@ -266,7 +269,7 @@ update() {
     			exit 1
 		fi
 	ln -s /usr/games/lolcat /usr/bin/lolcat ; ln -s /usr/games/lolcat /usr/local/bin/lolcat ; ln -s /usr/bin/Q /usr/local/bin/Q
-	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; echo -e "NAS-QNAP-${HWSN}" | tee /etc/qlauncher-qr | cut -b 45-
+	wget -O /usr/bin/Q https://git.io/JUxnc ; chmod +x /usr/bin/Q ; cat /etc/machine-id | tee /etc/qlauncher ; $ECMD "NAS-QNAP-${HWSN}" | tee /etc/qlauncher-qr | cut -b 45-
 	}
 
 do_update() {
@@ -389,7 +392,7 @@ bind
 port
 ;;
  -p|--port)
-port_api
+do_port_api
 ;;
  -d|--rem)
 rem

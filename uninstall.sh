@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#////////////////////////////////////
-# ql-uninstaller
-# langsung crot
-#////////////////////////////////////
+# Description		: Script to uninstall Qlauncher.
+# Author		: Rill (jakueenak@gmail.com)
+# Telegram		: t.me/pethot
+# Version		: beta
 
 ECMD="echo -e"
 COLOUR_RESET='\e[0m'
@@ -57,7 +57,7 @@ ql() {
         $ECMD "$GREEN_LINE"
         $ECMD "$GREEN_BULLET${aCOLOUR[2]}Uninstalling Qlauncher ..."
         $ECMD "$GREEN_LINE"
-			rm -rf /etc/ql
+			rm -rf /etc/ql ; rm /etc/qlauncher /etc/qlauncher-query /etc/qlauncher_ifconfig
 	}
 
 SWAP_DIR="/var/swap"
